@@ -30,28 +30,8 @@
         ''
         + builtins.readFile ./scripts/usbbench.sh;
       };
-      baseline = pkgs.writeShellApplication {
-        name = "baseline";
-        runtimeInputs = with pkgs; [
-          bash
-          coreutils
-          fio
-          gawk
-          gnugrep
-          gnused
-          jq
-          usbutils
-        ];
-        text = ''
-          GUEST_BENCH=${./scripts/guest-bench.sh}
-        ''
-        + builtins.readFile ./scripts/baseline.sh;
-      };
     in
     {
-      packages.x86_64-linux = {
-        default = usbbench;
-        inherit baseline;
-      };
+      packages.x86_64-linux.default = usbbench;
     };
 }

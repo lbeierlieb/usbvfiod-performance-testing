@@ -43,28 +43,3 @@ new device node your user and rerun with the new path.
 
 Per-revision logs (build, usbvfiod, Cloud Hypervisor, guest console) are in
 `usbbench-work/runs/<rev>/`.
-
-## Native baseline
-
-For reference, `baseline` runs the same fio job directly on the host, on
-the stick's block device, and prints the median:
-
-```console
-$ lsblk                                     # find the stick, e.g. /dev/sdb
-$ nix build .#baseline
-$ sudo ./result/bin/baseline /dev/sdb
-...
-native baseline, median of 3 runs:
-... MB/s, ... IOPS
-$ sudo chown -R $USER usbbench-work
-```
-
-It has to run as root: fio flushes the block device's buffers before it
-reads, which is not permitted for normal users even with access to the
-device node. Building it as your user first keeps Nix itself out of root.
-The last line gives `usbbench-work` back to you if the baseline created it.
-
-Run it before `usbbench`: once usbvfiod has claimed the stick, the host's
-block device is gone until the stick is replugged. The `BENCHINFO` lines
-show which host driver was used (`uas` or `usb-storage`); the guest always
-uses `usb-storage`, since usbvfiod does not support UAS.
