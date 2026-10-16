@@ -1,14 +1,18 @@
-# Runs inside the guest: read-only fio jobs against the passed-through USB
-# stick. Every result is printed as one line on the console:
+# guest-bench.sh BLOCKDEVICE
+#
+# Read-only fio jobs against the USB stick: in the guest on the passed-through
+# stick, and natively for the baseline. Every result is printed as one line:
 #   BENCHRESULT <job> <rep> <bandwidth KiB/s> <IOPS>
 # followed by BENCHDONE, or BENCHFAIL if something went wrong.
 
+dev=$1
+
 for _ in $(seq 120); do
-  [ -b /dev/sda ] && break
+  [ -b "$dev" ] && break
   sleep 1
 done
-if [ ! -b /dev/sda ]; then
-  echo "BENCHFAIL no /dev/sda"
+if [ ! -b "$dev" ]; then
+  echo "BENCHFAIL no $dev"
   exit 1
 fi
 lsusb -t | sed 's/^/BENCHINFO /'
@@ -18,7 +22,7 @@ for rep in 1 2 3; do
   for job in "seq1m read 1M" "seq64k read 64k" "rand4k randread 4k"; do
     read -r name rw bs <<<"$job"
     if ! out=$(timeout 120 fio --readonly --output-format=json \
-      --name="$name" --filename=/dev/sda --direct=1 --ioengine=psync \
+      --name="$name" --filename="$dev" --direct=1 --ioengine=psync \
       --rw="$rw" --bs="$bs" --ramp_time=2 --runtime=15 --time_based); then
       echo "BENCHFAIL fio $name"
       exit 1

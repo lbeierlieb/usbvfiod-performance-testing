@@ -44,7 +44,7 @@ let
               StandardOutput = "tty";
               StandardError = "tty";
               TTYPath = "/dev/hvc0";
-              ExecStart = "${pkgs.bash}/bin/bash ${./scripts/guest-bench.sh}";
+              ExecStart = "${pkgs.bash}/bin/bash ${./scripts/guest-bench.sh} /dev/sda";
               ExecStopPost = "${pkgs.systemd}/bin/systemctl poweroff --force --force";
             };
           };
