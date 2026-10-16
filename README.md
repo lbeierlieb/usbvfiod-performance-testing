@@ -1,0 +1,40 @@
+# usbvfiod performance across its history
+
+Measures how fast a Cloud Hypervisor guest reads from a USB 3 stick passed
+through with [usbvfiod](https://github.com/cyberus-technology/usbvfiod), for
+every merge to `main` since USB storage started working (PR #63, 2025-08-26).
+
+For each merge, `usbbench`
+
+1. builds usbvfiod with that revision's own `flake.lock` (tests skipped),
+2. starts it with `--device /dev/bus/usb/BBB/DDD`,
+3. boots a fixed NixOS guest in a fixed Cloud Hypervisor version,
+4. lets the guest run three read-only fio jobs on `/dev/sda`, three times each:
+   sequential 1 MiB, sequential 64 KiB, random 4 KiB (`O_DIRECT`, queue depth 1),
+5. appends the results to `usbbench-work/results.csv`.
+
+At the end it draws `usbbench-work/plot.png`: the median of the three
+repetitions per job, with failed revisions and releases marked.
+
+The stick is only read, never written.
+
+## Running
+
+Requirements: x86_64 Linux, Nix with flakes, `/dev/kvm` access.
+
+```console
+$ lsusb                                     # find the stick, e.g. Bus 002 Device 003
+$ sudo chown $USER /dev/bus/usb/002/003
+$ nix run . -- /dev/bus/usb/002/003
+```
+
+Each revision takes roughly 4 minutes plus its build, so the whole run takes
+a night. It can be interrupted at any time; a rerun skips revisions that
+already have results. To retry a revision, delete its lines from
+`results.csv`.
+
+If the stick re-enumerates (new device number), the script stops. Give the
+new device node your user and rerun with the new path.
+
+Per-revision logs (build, usbvfiod, Cloud Hypervisor, guest console) are in
+`usbbench-work/runs/<rev>/`.
