@@ -50,12 +50,18 @@ the stick's block device, and prints the median per job:
 
 ```console
 $ lsblk                                     # find the stick, e.g. /dev/sdb
-$ sudo chown $USER /dev/sdb
-$ nix run .#baseline -- /dev/sdb
+$ nix build .#baseline
+$ sudo ./result/bin/baseline /dev/sdb
 ...
 native baseline, median of 3 runs:
 seq1m       ...  MB/s      ... IOPS
+$ sudo chown -R $USER usbbench-work
 ```
+
+It has to run as root: fio flushes the block device's buffers before it
+reads, which is not permitted for normal users even with access to the
+device node. Building it as your user first keeps Nix itself out of root.
+The last line gives `usbbench-work` back to you if the baseline created it.
 
 Run it before `usbbench`: once usbvfiod has claimed the stick, the host's
 block device is gone until the stick is replugged. The `BENCHINFO` lines
