@@ -1,5 +1,5 @@
 {
-  description = "Benchmark USB stick read performance through usbvfiod across its history";
+  description = "Benchmark usbvfiod's USB storage read performance across its history";
 
   inputs.nixpkgs.url = "github:NixOS/nixpkgs/nixos-unstable";
 
@@ -7,25 +7,20 @@
     { nixpkgs, ... }:
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
-      guest = import ./chv-guest.nix {
-        inherit pkgs;
-        inherit (nixpkgs) lib;
-      };
+      inherit (nixpkgs) lib;
+      chvGuest = import ./chv-guest.nix { inherit lib pkgs; };
+      qemuVm = import ./qemu-vm.nix { inherit lib pkgs chvGuest; };
       usbbench = pkgs.writeShellApplication {
         name = "usbbench";
         runtimeInputs = with pkgs; [
-          cloud-hypervisor
           coreutils
           git
           gnugrep
           nix
-          usbutils
           (python3.withPackages (ps: [ ps.matplotlib ]))
         ];
         text = ''
-          GUEST_KERNEL=${guest.kernel}
-          GUEST_INITRD=${guest.initrd}
-          GUEST_CMDLINE="${guest.cmdline}"
+          QEMU_VM=${qemuVm}
           PLOT_PY=${./scripts/plot.py}
         ''
         + builtins.readFile ./scripts/usbbench.sh;
