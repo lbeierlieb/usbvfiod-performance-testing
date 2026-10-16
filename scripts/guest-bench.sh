@@ -1,6 +1,6 @@
 # guest-bench.sh BLOCKDEVICE
 #
-# Read-only fio jobs against the USB stick: in the guest on the passed-through
+# Read-only fio job against the USB stick: in the guest on the passed-through
 # stick, and natively for the baseline. Every result is printed as one line:
 #   BENCHRESULT <job> <rep> <bandwidth KiB/s> <IOPS>
 # followed by BENCHDONE, or BENCHFAIL if something went wrong.
@@ -17,19 +17,17 @@ if [ ! -b "$dev" ]; then
 fi
 lsusb -t | sed 's/^/BENCHINFO /'
 
-# Repetitions are the outer loop so that slow drift affects all jobs alike.
+# 1 MiB is the largest SCSI command usb-storage sends to USB 3 devices, so
+# every read is exactly one Bulk-Only Transport command.
 for rep in 1 2 3; do
-  for job in "seq1m read 1M" "seq64k read 64k" "rand4k randread 4k"; do
-    read -r name rw bs <<<"$job"
-    if ! out=$(timeout 120 fio --readonly --output-format=json \
-      --name="$name" --filename="$dev" --direct=1 --ioengine=psync \
-      --rw="$rw" --bs="$bs" --ramp_time=2 --runtime=15 --time_based); then
-      echo "BENCHFAIL fio $name"
-      exit 1
-    fi
-    jq -r --arg rep "$rep" \
-      '.jobs[0] | "BENCHRESULT \(.jobname) \($rep) \(.read.bw) \(.read.iops)"' <<<"$out"
-  done
+  if ! out=$(timeout 120 fio --readonly --output-format=json \
+    --name=seq1m --filename="$dev" --direct=1 --ioengine=psync \
+    --rw=read --bs=1M --ramp_time=2 --runtime=15 --time_based); then
+    echo "BENCHFAIL fio"
+    exit 1
+  fi
+  jq -r --arg rep "$rep" \
+    '.jobs[0] | "BENCHRESULT \(.jobname) \($rep) \(.read.bw) \(.read.iops)"' <<<"$out"
 done
 
 echo "BENCHDONE"

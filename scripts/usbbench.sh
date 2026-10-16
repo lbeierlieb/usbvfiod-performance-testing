@@ -77,7 +77,7 @@ while read -r rev date; do
     sleep 0.1
   done
 
-  # Boot takes well under a minute, the fio jobs 3 x 3 x 17s.
+  # Boot takes well under a minute, the fio runs 3 x 17s.
   timeout --kill-after=10 600 cloud-hypervisor \
     --kernel "$GUEST_KERNEL" \
     --initramfs "$GUEST_INITRD" \

@@ -13,12 +13,13 @@ For each merge, `usbbench`
 2. resets the stick (`usbreset`, as usbvfiod itself does since PR #87) and
    starts usbvfiod with `--device /dev/bus/usb/BBB/DDD`,
 3. boots a fixed NixOS guest in a fixed Cloud Hypervisor version,
-4. lets the guest run three read-only fio jobs on `/dev/sda`, three times each:
-   sequential 1 MiB, sequential 64 KiB, random 4 KiB (`O_DIRECT`, queue depth 1),
+4. lets the guest read `/dev/sda` sequentially in 1 MiB blocks for 15 s, three
+   times (fio, read-only, `O_DIRECT`, queue depth 1). 1 MiB is the largest
+   command the guest's usb-storage driver sends to a USB 3 device,
 5. appends the results to `usbbench-work/results.csv`.
 
 At the end it draws `usbbench-work/plot.png`: the median of the three
-repetitions per job, with failed revisions and releases marked.
+repetitions, with failed revisions and releases marked.
 
 The stick is only read, never written.
 
@@ -32,7 +33,7 @@ $ sudo chown $USER /dev/bus/usb/002/003
 $ nix run . -- /dev/bus/usb/002/003
 ```
 
-Each revision takes roughly 4 minutes plus its build, so the whole run takes
+Each revision takes roughly 2 minutes plus its build, so the whole run takes
 a night. It can be interrupted at any time; a rerun skips revisions that
 already have results. To retry a revision, delete its lines from
 `results.csv`.
@@ -45,8 +46,8 @@ Per-revision logs (build, usbvfiod, Cloud Hypervisor, guest console) are in
 
 ## Native baseline
 
-For reference, `baseline` runs the same fio jobs directly on the host, on
-the stick's block device, and prints the median per job:
+For reference, `baseline` runs the same fio job directly on the host, on
+the stick's block device, and prints the median:
 
 ```console
 $ lsblk                                     # find the stick, e.g. /dev/sdb
@@ -54,7 +55,7 @@ $ nix build .#baseline
 $ sudo ./result/bin/baseline /dev/sdb
 ...
 native baseline, median of 3 runs:
-seq1m       ...  MB/s      ... IOPS
+... MB/s, ... IOPS
 $ sudo chown -R $USER usbbench-work
 ```
 
