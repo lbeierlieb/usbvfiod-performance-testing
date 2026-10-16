@@ -16,9 +16,11 @@ WORK=$PWD/usbbench-work
 CLONE=$WORK/usbvfiod
 RESULTS=$WORK/results.csv
 
-# The first merge that works with real USB sticks (PR #78, 2025-09-18).
-# Before it, only the bulk endpoints of QEMU's emulated stick were supported.
-FIRST_MERGE=006f94e
+# The first merge that works with real USB sticks (PR #104, 2025-10-16).
+# Before PR #78 only the bulk endpoints of QEMU's emulated stick were
+# supported, and before PR #104 usbvfiod gave up when a bulk OUT transfer
+# took longer than 800 ms, which happens on the first one after a reset.
+FIRST_MERGE=cc50318
 
 check_device() {
   if [ ! -r "$DEVICE" ] || [ ! -w "$DEVICE" ]; then
