@@ -29,6 +29,8 @@ check_device() {
 check_device
 
 mkdir -p "$WORK"
+# Unix socket paths are limited to 108 bytes, too short for the run directory.
+SOCKET=$(mktemp -d)/usbvfiod.sock
 if [ ! -d "$CLONE" ]; then
   git clone https://github.com/cyberus-technology/usbvfiod "$CLONE"
 fi
@@ -63,11 +65,12 @@ while read -r rev date; do
   # here before every revision alike.
   usbreset "${DEVICE#/dev/bus/usb/}" >"$run/usbreset.log" 2>&1
   check_device
-  "$run/usbvfiod/bin/usbvfiod" --socket-path "$run/usbvfiod.sock" \
+  rm -f "$SOCKET"
+  "$run/usbvfiod/bin/usbvfiod" --socket-path "$SOCKET" \
     --device "$DEVICE" >"$run/usbvfiod.log" 2>&1 &
   usbvfiod_pid=$!
   for _ in $(seq 50); do
-    [ -S "$run/usbvfiod.sock" ] && break
+    [ -S "$SOCKET" ] && break
     sleep 0.1
   done
 
@@ -78,7 +81,7 @@ while read -r rev date; do
     --cmdline "$GUEST_CMDLINE" \
     --cpus boot=2 \
     --memory size=4G,shared=on \
-    --user-device socket="$run/usbvfiod.sock" \
+    --user-device socket="$SOCKET" \
     --console file="$run/console.log" \
     --serial off \
     >"$run/cloud-hypervisor.log" 2>&1 || true
