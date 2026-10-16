@@ -39,3 +39,22 @@ new device node your user and rerun with the new path.
 
 Per-revision logs (build, usbvfiod, Cloud Hypervisor, guest console) are in
 `usbbench-work/runs/<rev>/`.
+
+## Native baseline
+
+For reference, `baseline` runs the same fio jobs directly on the host, on
+the stick's block device, and prints the median per job:
+
+```console
+$ lsblk                                     # find the stick, e.g. /dev/sdb
+$ sudo chown $USER /dev/sdb
+$ nix run .#baseline -- /dev/sdb
+...
+native baseline, median of 3 runs:
+seq1m       ...  MB/s      ... IOPS
+```
+
+Run it before `usbbench`: once usbvfiod has claimed the stick, the host's
+block device is gone until the stick is replugged. The `BENCHINFO` lines
+show which host driver was used (`uas` or `usb-storage`); the guest always
+uses `usb-storage`, since usbvfiod does not support UAS.
