@@ -19,6 +19,7 @@
           git
           gnugrep
           nix
+          usbutils
           (python3.withPackages (ps: [ ps.matplotlib ]))
         ];
         text = ''

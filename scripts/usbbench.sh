@@ -58,6 +58,10 @@ while read -r rev date; do
     continue
   fi
 
+  # usbvfiod resets the stick at launch only since PR #87 (2025-09-25).
+  # Older revisions leave it in a bad state for the next launch, so reset it
+  # here before every revision alike.
+  usbreset "${DEVICE#/dev/bus/usb/}" >"$run/usbreset.log" 2>&1
   check_device
   "$run/usbvfiod/bin/usbvfiod" --socket-path "$run/usbvfiod.sock" \
     --device "$DEVICE" >"$run/usbvfiod.log" 2>&1 &

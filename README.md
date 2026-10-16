@@ -7,7 +7,8 @@ every merge to `main` since USB storage started working (PR #63, 2025-08-26).
 For each merge, `usbbench`
 
 1. builds usbvfiod with that revision's own `flake.lock` (tests skipped),
-2. starts it with `--device /dev/bus/usb/BBB/DDD`,
+2. resets the stick (`usbreset`, as usbvfiod itself does since PR #87) and
+   starts usbvfiod with `--device /dev/bus/usb/BBB/DDD`,
 3. boots a fixed NixOS guest in a fixed Cloud Hypervisor version,
 4. lets the guest run three read-only fio jobs on `/dev/sda`, three times each:
    sequential 1 MiB, sequential 64 KiB, random 4 KiB (`O_DIRECT`, queue depth 1),
