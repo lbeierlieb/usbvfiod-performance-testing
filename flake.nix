@@ -7,7 +7,7 @@
     { nixpkgs, ... }:
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
-      guest = import ./guest.nix {
+      guest = import ./chv-guest.nix {
         inherit pkgs;
         inherit (nixpkgs) lib;
       };
