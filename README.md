@@ -2,44 +2,50 @@
 
 Measures how fast a Cloud Hypervisor guest reads from a USB 3 stick passed
 through with [usbvfiod](https://github.com/cyberus-technology/usbvfiod), for
-every merge to `main` since it works with real USB sticks (PR #104, 2025-10-16).
-Earlier merges either supported only the endpoints of QEMU's emulated USB
-stick, or gave up when a real stick took longer than 800 ms for the first bulk
-transfer after a reset.
+every merge to `main` since USB storage works (PR #63, 2025-08-26).
 
-For each merge, `usbbench`
+The stick is QEMU's emulated USB 3 `usb-storage` device, as in usbvfiod's own
+integration tests, backed by a 1 GiB file of random data:
+
+```
+host
+└── QEMU VM (qemu-xhci + emulated USB stick)
+    ├── baseline: fio directly on the stick
+    └── usbvfiod ── Cloud Hypervisor guest: fio on the passed-through stick
+```
+
+`usbbench` first runs the baseline once, then for each merge it
 
 1. builds usbvfiod with that revision's own `flake.lock` (tests skipped),
-2. resets the stick (`usbreset`, as usbvfiod itself does since PR #87) and
-   starts usbvfiod with `--device /dev/bus/usb/BBB/DDD`,
-3. boots a fixed NixOS guest in a fixed Cloud Hypervisor version,
-4. lets the guest read `/dev/sda` sequentially in 1 MiB blocks for 15 s, three
+2. boots a fresh QEMU VM, which starts that usbvfiod with the stick and a
+   fixed Cloud Hypervisor with a fixed NixOS guest,
+3. lets the guest read `/dev/sda` sequentially in 1 MiB blocks for 15 s, three
    times (fio, read-only, `O_DIRECT`, queue depth 1). 1 MiB is the largest
    command the guest's usb-storage driver sends to a USB 3 device,
-5. appends the results to `usbbench-work/results.csv`.
+4. appends the results to `usbbench-work/results.csv`.
 
 At the end it draws `usbbench-work/plot.png`: the median of the three
-repetitions, with failed revisions and releases marked.
+repetitions per merge, with failed revisions and releases marked and the
+baseline as a reference line.
 
-The stick is only read, never written.
+Everything except usbvfiod is pinned by this flake, so only usbvfiod changes
+between measurements. The Cloud Hypervisor guest runs nested inside the QEMU
+VM, which makes every VM exit expensive. The numbers are meant for comparing
+usbvfiod revisions with each other, not as real-world throughput.
 
 ## Running
 
-Requirements: x86_64 Linux, Nix with flakes, `/dev/kvm` access.
+Requirements: x86_64 Linux, Nix with flakes, `/dev/kvm` access, and nested
+virtualization (`cat /sys/module/kvm_intel/parameters/nested` or
+`/sys/module/kvm_amd/parameters/nested` shows `Y` or `1`).
 
 ```console
-$ lsusb                                     # find the stick, e.g. Bus 002 Device 003
-$ sudo chown $USER /dev/bus/usb/002/003
-$ nix run . -- /dev/bus/usb/002/003
+$ nix run .
 ```
 
-Each revision takes roughly 2 minutes plus its build, so the whole run takes
-a night. It can be interrupted at any time; a rerun skips revisions that
-already have results. To retry a revision, delete its lines from
-`results.csv`.
+The whole run takes a night. It can be interrupted at any time; a rerun skips
+everything that already has results. To retry a revision, delete its lines
+from `results.csv`.
 
-If the stick re-enumerates (new device number), the script stops. Give the
-new device node your user and rerun with the new path.
-
-Per-revision logs (build, usbvfiod, Cloud Hypervisor, guest console) are in
-`usbbench-work/runs/<rev>/`.
+The console of each QEMU VM, including the logs of usbvfiod, Cloud Hypervisor
+and the guest, is in `usbbench-work/runs/<rev>/vm.log`, next to the build log.
