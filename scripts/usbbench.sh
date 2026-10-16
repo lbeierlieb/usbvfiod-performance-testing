@@ -1,6 +1,6 @@
 # usbbench /dev/bus/usb/BBB/DDD
 #
-# For every merge to usbvfiod's main branch since USB storage started working,
+# For every merge to usbvfiod's main branch since real USB sticks work,
 # build usbvfiod, boot a Cloud Hypervisor guest with the USB stick passed
 # through, and record the guest's read performance in results.csv.
 # Everything lives in ./usbbench-work. Interrupt at any time; a rerun skips
@@ -16,8 +16,9 @@ WORK=$PWD/usbbench-work
 CLONE=$WORK/usbvfiod
 RESULTS=$WORK/results.csv
 
-# The first merge with working USB storage (PR #63, 2025-08-26).
-FIRST_MERGE=013e90c
+# The first merge that works with real USB sticks (PR #78, 2025-09-18).
+# Before it, only the bulk endpoints of QEMU's emulated stick were supported.
+FIRST_MERGE=006f94e
 
 check_device() {
   if [ ! -r "$DEVICE" ] || [ ! -w "$DEVICE" ]; then

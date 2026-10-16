@@ -2,7 +2,8 @@
 
 Measures how fast a Cloud Hypervisor guest reads from a USB 3 stick passed
 through with [usbvfiod](https://github.com/cyberus-technology/usbvfiod), for
-every merge to `main` since USB storage started working (PR #63, 2025-08-26).
+every merge to `main` since it works with real USB sticks (PR #78, 2025-09-18).
+Earlier merges only supported the endpoints of QEMU's emulated USB stick.
 
 For each merge, `usbbench`
 
