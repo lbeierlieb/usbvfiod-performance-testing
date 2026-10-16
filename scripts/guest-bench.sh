@@ -1,7 +1,8 @@
 # guest-bench.sh BLOCKDEVICE
 #
-# Read-only fio job against the USB stick: in the guest on the passed-through
-# stick, and natively for the baseline. Every result is printed as one line:
+# Read-only fio job against the USB stick: in the Cloud Hypervisor guest on the
+# passed-through stick, and in the QEMU VM directly for the baseline. Every
+# result is printed as one line:
 #   BENCHRESULT <job> <rep> <bandwidth KiB/s> <IOPS>
 # followed by BENCHDONE, or BENCHFAIL if something went wrong.
 
