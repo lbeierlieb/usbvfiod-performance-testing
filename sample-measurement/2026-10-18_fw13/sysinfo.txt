@@ -1,0 +1,16 @@
+machine: Framework Laptop 13 (AMD Ryzen 7040Series)
+kernel: 7.2.9
+
+CPU(s):                                  12
+Model name:                              AMD Ryzen 5 7640U w/ Radeon 760M Graphics
+Thread(s) per core:                      2
+Core(s) per socket:                      6
+Socket(s):                               1
+CPU(s) scaling MHz:                      79%
+CPU max MHz:                             4972,4351
+Virtualization:                          AMD-V
+
+MemTotal:       32147652 kB
+
+NAME    MODEL                    SIZE ROTA TRAN
+nvme0n1 WD_BLACK SN850X 1000GB 931,5G    0 nvme
