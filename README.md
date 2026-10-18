@@ -4,6 +4,13 @@ Measures how fast a Cloud Hypervisor guest reads from a USB 3 stick passed
 through with [usbvfiod](https://github.com/cyberus-technology/usbvfiod), for
 every merge to `main` since USB storage works (PR #63, 2025-08-26).
 
+![Sequential read throughput of every merge to usbvfiod's main branch](sample-measurement/2026-10-18_fw13/plot.png)
+
+A run from 2026-10-18 on a Framework Laptop 13 with an AMD Ryzen 5 7640U
+([machine](sample-measurement/2026-10-18_fw13/sysinfo.txt),
+[results](sample-measurement/2026-10-18_fw13/results.csv)). Red crosses
+mark revisions without a result.
+
 The stick is QEMU's emulated USB 3 `usb-storage` device, as in usbvfiod's own
 integration tests, backed by a 1 GiB file of random data:
 
