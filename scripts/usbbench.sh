@@ -1,7 +1,9 @@
 # usbbench
 #
 # Measures sequential 1 MiB reads from QEMU's emulated USB 3 stick:
-# - once directly in the QEMU VM (baseline), and
+# - once directly in the QEMU VM (baseline),
+# - once passed through with QEMU's usb-host to a nested QEMU guest
+#   (qemu-usb-host), and
 # - for every merge to usbvfiod's main branch since USB storage works, in a
 #   fresh QEMU VM, passed through with that usbvfiod to a Cloud Hypervisor
 #   guest.
@@ -60,11 +62,17 @@ run_vm() {
   echo "    $status"
 }
 
-if ! grep -q '^baseline,' "$RESULTS"; then
-  echo "=== baseline"
-  mkdir -p "$WORK/runs/baseline"
-  run_vm baseline - "$WORK/runs/baseline" usbbench.mode=baseline
-fi
+# The baselines do not depend on usbvfiod; each is measured once.
+for baseline in "baseline baseline" "qemu-usb-host qemu"; do
+  read -r name mode <<<"$baseline"
+  if grep -q "^$name," "$RESULTS"; then
+    continue
+  fi
+  echo "=== $name"
+  rm -rf "$WORK/runs/$name"
+  mkdir -p "$WORK/runs/$name"
+  run_vm "$name" - "$WORK/runs/$name" "usbbench.mode=$mode"
+done
 
 while read -r rev date; do
   if grep -q "^$rev," "$RESULTS"; then

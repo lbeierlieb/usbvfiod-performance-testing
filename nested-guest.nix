@@ -1,6 +1,7 @@
-# The Cloud Hypervisor guest: a NixOS netboot image (as in usbvfiod's own
-# integration tests) that runs scripts/guest-bench.sh on boot, prints the
-# results on the virtio console (hvc0) and powers off.
+# The nested guest: a NixOS netboot image (as in usbvfiod's own integration
+# tests) that runs scripts/guest-bench.sh on boot, prints the results on the
+# virtio console (hvc0) and powers off. The same image runs in Cloud
+# Hypervisor with usbvfiod and in the nested QEMU with usb-host.
 { lib, pkgs }:
 let
   nixos = lib.nixosSystem {

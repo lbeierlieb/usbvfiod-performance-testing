@@ -2,7 +2,8 @@
 # integration tests) that runs scripts/vm-bench.sh on boot and powers off.
 # The emulated USB stick is added on the QEMU command line at runtime. The
 # host's /nix/store is shared with the VM, so every usbvfiod build is
-# available inside.
+# available inside. The nested guest runs either in Cloud Hypervisor with
+# usbvfiod or, for the QEMU passthrough baseline, in a nested QEMU.
 {
   lib,
   pkgs,
@@ -19,6 +20,7 @@ let
       gnugrep
       gnused
       jq
+      qemu_kvm
       usbutils
     ];
     text = ''
