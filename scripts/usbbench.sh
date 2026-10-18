@@ -63,7 +63,7 @@ run_vm() {
 if ! grep -q '^baseline,' "$RESULTS"; then
   echo "=== baseline"
   mkdir -p "$WORK/runs/baseline"
-  run_vm baseline - "$WORK/runs/baseline"
+  run_vm baseline - "$WORK/runs/baseline" usbbench.mode=baseline
 fi
 
 while read -r rev date; do
@@ -84,7 +84,7 @@ while read -r rev date; do
     continue
   fi
 
-  run_vm "$rev" "$date" "$run" "usbbench.usbvfiod=$(readlink -f "$run/usbvfiod")/bin/usbvfiod"
+  run_vm "$rev" "$date" "$run" "usbbench.mode=usbvfiod usbbench.usbvfiod=$(readlink -f "$run/usbvfiod")/bin/usbvfiod"
 done <"$WORK/merges.txt"
 
 python3 "$PLOT_PY" "$CLONE" "$RESULTS" "$WORK/plot.png"

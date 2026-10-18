@@ -1,16 +1,30 @@
 # Runs inside the QEMU VM and prints everything on its serial console.
 # (GUEST_BENCH, GUEST_KERNEL, GUEST_INITRD and GUEST_CMDLINE are set by Nix.)
 #
-# Without usbbench.usbvfiod=PATH on the kernel command line, it runs the fio
-# job directly on QEMU's emulated USB stick: the baseline. With it, it passes
-# the stick through to a Cloud Hypervisor guest with that usbvfiod binary,
-# and the guest runs the fio job.
+# usbbench.mode= on the kernel command line selects what is measured:
+# - baseline: the fio job directly on QEMU's emulated USB stick,
+# - usbvfiod: the stick passed through to a Cloud Hypervisor guest with the
+#   usbvfiod binary given as usbbench.usbvfiod=PATH, and the guest runs the
+#   fio job.
 
-usbvfiod=$(sed -n 's/.*usbbench\.usbvfiod=\([^ ]*\).*/\1/p' /proc/cmdline)
-if [ -z "$usbvfiod" ]; then
+# cmdline_param NAME: the value of NAME= on the kernel command line.
+cmdline_param() {
+  sed -n "s/.*$1=\([^ ]*\).*/\1/p" /proc/cmdline
+}
+
+mode=$(cmdline_param 'usbbench\.mode')
+case $mode in
+baseline)
   bash "$GUEST_BENCH" /dev/sda
   exit
-fi
+  ;;
+usbvfiod) ;;
+*)
+  echo "BENCHFAIL unknown usbbench.mode=$mode"
+  exit 1
+  ;;
+esac
+usbvfiod=$(cmdline_param 'usbbench\.usbvfiod')
 
 # Wait for /dev/kvm and the emulated stick (46f4:0001) as /dev/bus/usb/BBB/DDD.
 device=
