@@ -6,7 +6,7 @@
 {
   lib,
   pkgs,
-  chvGuest,
+  nestedGuest,
 }:
 let
   vm-bench = pkgs.writeShellApplication {
@@ -23,9 +23,9 @@ let
     ];
     text = ''
       GUEST_BENCH=${./scripts/guest-bench.sh}
-      GUEST_KERNEL=${chvGuest.kernel}
-      GUEST_INITRD=${chvGuest.initrd}
-      GUEST_CMDLINE="${chvGuest.cmdline}"
+      GUEST_KERNEL=${nestedGuest.kernel}
+      GUEST_INITRD=${nestedGuest.initrd}
+      GUEST_CMDLINE="${nestedGuest.cmdline}"
     ''
     + builtins.readFile ./scripts/vm-bench.sh;
   };

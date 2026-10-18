@@ -8,8 +8,8 @@
     let
       pkgs = nixpkgs.legacyPackages.x86_64-linux;
       inherit (nixpkgs) lib;
-      chvGuest = import ./chv-guest.nix { inherit lib pkgs; };
-      qemuVm = import ./qemu-vm.nix { inherit lib pkgs chvGuest; };
+      nestedGuest = import ./nested-guest.nix { inherit lib pkgs; };
+      qemuVm = import ./qemu-vm.nix { inherit lib pkgs nestedGuest; };
       usbbench = pkgs.writeShellApplication {
         name = "usbbench";
         runtimeInputs = with pkgs; [
