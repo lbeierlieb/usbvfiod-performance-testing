@@ -25,8 +25,18 @@
         ''
         + builtins.readFile ./scripts/usbbench.sh;
       };
+      sysinfo = pkgs.writeShellApplication {
+        name = "sysinfo";
+        runtimeInputs = with pkgs; [
+          coreutils
+          gnugrep
+          util-linux
+        ];
+        text = builtins.readFile ./scripts/sysinfo.sh;
+      };
     in
     {
       packages.x86_64-linux.default = usbbench;
+      packages.x86_64-linux.sysinfo = sysinfo;
     };
 }
