@@ -3,7 +3,8 @@
 Sequential 1 MiB read throughput, median over the 3 repetitions, for every
 merge to main in merge order. Failed revisions are marked at the bottom,
 releases are drawn as vertical lines, the baselines (fio directly in the QEMU
-VM, and in a nested QEMU guest with usb-host passthrough) as horizontal lines.
+VM, and in a nested QEMU guest with usb-host passthrough) as labelled
+horizontal lines.
 """
 
 import csv
@@ -67,12 +68,11 @@ ref = {name: statistics.median(v) for name, v in baselines.items()}
 ax.set_ylim(bottom=0, top=max(ys + list(ref.values()), default=1) * 1.15)
 for name, (label, style) in BASELINES.items():
     if name in ref:
-        ax.axhline(ref[name], color=INK, linewidth=1, linestyle=style, label=f"{label}: {ref[name]:.0f} MB/s")
+        ax.axhline(ref[name], color=INK, linewidth=1, linestyle=style)
+        ax.annotate(f"{label}: {ref[name]:.0f} MB/s", (0, ref[name]), xycoords=("axes fraction", "data"),
+                    xytext=(4, 3), textcoords="offset points", color=INK, fontsize=9)
 bad = [i for i, rev in enumerate(revs) if rev in failed]
-if bad:
-    ax.plot(bad, [0] * len(bad), "x", color=FAILED, markersize=8, clip_on=False, label="failed")
-if ref or bad:
-    ax.legend(loc="lower right", frameon=False)
+ax.plot(bad, [0] * len(bad), "x", color=FAILED, markersize=8, clip_on=False)
 for i, tag in releases:
     ax.axvline(i, color=INK, linewidth=0.8, linestyle=":")
     ax.annotate(tag, (i, 1), xycoords=("data", "axes fraction"), xytext=(3, -12),
