@@ -1,0 +1,18 @@
+machine: System manufacturer System Product Name
+kernel: 6.12.92
+
+CPU(s):                                  16
+Model name:                              AMD Ryzen 7 5700G with Radeon Graphics
+Thread(s) per core:                      2
+Core(s) per socket:                      8
+Socket(s):                               1
+CPU(s) scaling MHz:                      84%
+CPU max MHz:                             4673,0000
+Virtualization:                          AMD-V
+
+MemTotal:       32136248 kB
+
+NAME    MODEL                       SIZE ROTA TRAN
+sda     INTENSO SSD                 1,9T    0 sata
+sdb     INTENSO SSD                 1,9T    0 sata
+nvme0n1 Samsung SSD 960 EVO 500GB 465,8G    0 nvme
